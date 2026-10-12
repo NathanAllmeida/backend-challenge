@@ -34,7 +34,13 @@ export class HttpErrorFilter implements ExceptionFilter {
     }
 
     if (status >= 500) {
-      this.logger.error({ message: 'request failed', status, code: body.error.code, error: (error as Error)?.message });
+      this.logger.error({
+        message: 'request failed',
+        status,
+        code: body.error.code,
+        error: (error as Error)?.message,
+        cause: ((error as Error)?.cause as Error | undefined)?.message,
+      });
     }
 
     response.status(status).json(body);
