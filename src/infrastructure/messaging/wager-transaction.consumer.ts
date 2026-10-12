@@ -66,7 +66,8 @@ export class WagerTransactionConsumer {
   }
 
   async pollOnce(waitTimeSeconds = appConfig.sqs.waitTimeSeconds, visibilityTimeout = appConfig.sqs.visibilityTimeoutSeconds): Promise<number> {
-    this.poll = new AbortController();
+    const poll = new AbortController();
+    this.poll = poll;
 
     const { Messages = [] } = await this.queues.client.send(new ReceiveMessageCommand({
       QueueUrl: await this.queues.wager(),
@@ -74,7 +75,11 @@ export class WagerTransactionConsumer {
       WaitTimeSeconds: waitTimeSeconds,
       VisibilityTimeout: visibilityTimeout,
       MessageSystemAttributeNames: ['ApproximateReceiveCount', 'MessageGroupId'],
-    }), { abortSignal: this.poll.signal });
+    }), { abortSignal: poll.signal }).finally(() => {
+      if (this.poll === poll) {
+        this.poll = undefined;
+      }
+    });
 
     const work = this.processByGroup(Messages);
     this.inFlight.add(work);
