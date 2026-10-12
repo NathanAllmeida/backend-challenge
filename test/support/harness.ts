@@ -1,7 +1,6 @@
 import {
   DeleteMessageCommand,
   Message,
-  PurgeQueueCommand,
   ReceiveMessageCommand,
   SendMessageCommand,
   SQSClient,
@@ -112,7 +111,21 @@ export class TestQueues {
     await setupQueues(this.client);
 
     for (const url of [await this.queues.wager(), await this.queues.wagerDlq(), await this.queues.events()]) {
-      await this.client.send(new PurgeQueueCommand({ QueueUrl: url }));
+      await this.clear(url);
+    }
+  }
+
+  private async clear(url: string): Promise<void> {
+    for (;;) {
+      const { Messages = [] } = await this.client.send(new ReceiveMessageCommand({ QueueUrl: url, MaxNumberOfMessages: 10, WaitTimeSeconds: 0 }));
+
+      if (Messages.length === 0) {
+        return;
+      }
+
+      for (const message of Messages) {
+        await this.client.send(new DeleteMessageCommand({ QueueUrl: url, ReceiptHandle: message.ReceiptHandle! }));
+      }
     }
   }
 
