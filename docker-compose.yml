@@ -42,7 +42,7 @@ services:
     ports:
       - "4566:4566"
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:4566/_localstack/health | grep -q '\"sqs\": \"\(available\|running\)\"'"]
+      test: ["CMD", "awslocal", "sqs", "list-queues"]
       interval: 3s
       timeout: 3s
       retries: 30
