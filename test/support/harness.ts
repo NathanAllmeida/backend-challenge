@@ -1,5 +1,6 @@
 import {
   DeleteMessageCommand,
+  GetQueueAttributesCommand,
   Message,
   ReceiveMessageCommand,
   SendMessageCommand,
@@ -138,6 +139,15 @@ export class TestQueues {
       MessageGroupId: envelope.data?.walletId ?? 'malformed',
       MessageDeduplicationId: deduplicationId,
     }));
+  }
+
+  async depth(): Promise<number> {
+    const { Attributes = {} } = await this.client.send(new GetQueueAttributesCommand({
+      QueueUrl: await this.queues.wager(),
+      AttributeNames: ['ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible'],
+    }));
+
+    return Number(Attributes.ApproximateNumberOfMessages ?? 0) + Number(Attributes.ApproximateNumberOfMessagesNotVisible ?? 0);
   }
 
   async sendRaw(body: string): Promise<void> {
