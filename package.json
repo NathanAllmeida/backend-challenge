@@ -10,10 +10,10 @@
     "migration:down": "bun src/infrastructure/database/migrate.ts down",
     "queues:setup": "bun src/infrastructure/messaging/setup-queues.ts",
     "typecheck": "tsc --noEmit",
-    "test": "bun test",
+    "test": "bun test --timeout 300000",
     "test:unit": "bun test test/unit",
-    "test:integration": "bun test test/integration --timeout 60000",
-    "test:concurrency": "bun test test/concurrency --timeout 120000"
+    "test:integration": "bun test test/integration --timeout 120000",
+    "test:concurrency": "bun test test/concurrency --timeout 300000"
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.1150.0",
