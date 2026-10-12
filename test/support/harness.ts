@@ -47,6 +47,8 @@ export async function resetDatabase(): Promise<void> {
   }
 }
 
+export type SqlRunner = (sql: string, params?: unknown[]) => Promise<unknown>;
+
 export class Sql {
   private constructor(private readonly orm: MikroORM) {}
 
@@ -58,7 +60,7 @@ export class Sql {
     return this.orm.em.getConnection().execute(sql, params);
   }
 
-  transaction(work: (run: (sql: string, params?: unknown[]) => Promise<unknown>) => Promise<void>): Promise<void> {
+  transaction(work: (run: SqlRunner) => Promise<void>): Promise<void> {
     return this.orm.em.fork().transactional((em) => work((query, params = []) => em.execute(query, params)));
   }
 

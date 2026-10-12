@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { v7 as uuidv7 } from 'uuid';
 import { databaseConfig } from '@/infrastructure/database/mikro-orm.config';
-import { resetDatabase, Sql } from '../support/harness';
+import { resetDatabase, Sql, SqlRunner } from '../support/harness';
 
 let sql: Sql;
 
@@ -49,7 +49,7 @@ async function insertTransaction(walletId: string, overrides: Record<string, unk
   return id;
 }
 
-async function insertLedger(walletId: string, transactionId: string, direction: string, amount: string, before: string, after: string, run = sql.query.bind(sql)) {
+async function insertLedger(walletId: string, transactionId: string, direction: string, amount: string, before: string, after: string, run: SqlRunner = (query, params) => sql.query(query, params)) {
   await run(
     `INSERT INTO wallet_ledger_entries (id, wallet_id, transaction_id, direction, amount, currency, balance_before, balance_after, created_at)
      VALUES (?, ?, ?, ?, ?, 'BRL', ?, ?, ?)`,
